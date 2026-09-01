@@ -19,6 +19,15 @@ android.minapi = 21
 # Разрешения
 android.permissions = INTERNET
 
+# Java version
+android.gradle_dependencies = 
+
+# Отключить использование legacy Build Tools
+android.skip_update = False
+
+# NDK version
+android.ndk = 25b
+
 [buildozer]
 log_level = 2
 warn_on_root = 1
