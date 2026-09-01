@@ -27,11 +27,13 @@ jobs:
           # Explicitly run buildozer command
           command: android debug
 
-      - name: List bin for debugging
-        run: ls -la bin || echo "bin not found"
+      - name: Find APK files
+        run: find . -name "*.apk" -type f
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: FakeBank-Release-APK
-          path: bin/*.apk
+          path: bin/
+
