@@ -13,27 +13,61 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python (optional)
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Build with Buildozer Action
-        uses: ArtemSBulgakov/buildozer-action@v1
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            python3-dev \
+            python3-setuptools \
+            openjdk-17-jdk-headless \
+            android-sdk \
+            android-sdk-platform-tools \
+            android-sdk-build-tools \
+            cython3 \
+            ccache \
+            git
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install buildozer cython setuptools
+
+      - name: Build APK with Buildozer
+        run: |
+          cd ${{ github.workspace }}
+          buildozer android debug 2>&1 | tee build_output.log
+        continue-on-error: true
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          working-directory: .
-          # Specify a concrete version or remove to use latest
-          buildozer_version: 1.5.1
-          # Explicitly run buildozer command
-          command: android debug
+          name: build-log
+          path: build_output.log
 
       - name: Find APK files
-        run: find . -name "*.apk" -type f
+        run: |
+          echo "Searching for APK files..."
+          find . -name "*.apk" -type f -exec ls -lh {} \;
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
         if: success()
+        uses: actions/upload-artifact@v4
         with:
-          name: FakeBank-Release-APK
+          name: FakeBank-Debug-APK
           path: bin/
+          if-no-files-found: warn
 
+      - name: Upload bin directory structure
+        if: always()
+        run: |
+          echo "=== Directory structure ===" 
+          ls -la bin/ 2>/dev/null || echo "bin/ directory not found"
+          echo "=== Root directory ===" 
+          ls -la . | head -20
