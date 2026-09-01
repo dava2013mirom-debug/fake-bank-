@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python (optional)
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -21,12 +21,17 @@ jobs:
       - name: Build with Buildozer Action
         uses: ArtemSBulgakov/buildozer-action@v1
         with:
-          workdir: .
-          buildozer_version: stable
+          working-directory: .
+          # Specify a concrete version or remove to use latest
+          buildozer_version: 1.5.1
+          # Explicitly run buildozer command
+          command: android debug
+
+      - name: List bin for debugging
+        run: ls -la bin || echo "bin not found"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: FakeBank-Release-APK
           path: bin/*.apk
-          
